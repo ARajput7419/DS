@@ -1,56 +1,108 @@
 package tree;
 
 import java.util.HashMap;
-import java.util.Scanner;
-
-class TreeNode{
-    TreeNode left ;
-    TreeNode right;
-    int value;
-    TreeNode(int value){
-        this.value=value;
-    }
-}
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Tree {
 
-    private static TreeNode root;
 
+   private static class TreeNode{
+        TreeNode left ;
+        TreeNode right;
+        int value;
+        TreeNode(int value){
+            this.value=value;
+        }
+    }
 
-   static  private TreeNode insert(TreeNode node,int key){
+    private  TreeNode root;
+    private TreeNode insert(TreeNode node,int key){
         if (node==null) return new TreeNode(key);
-        if (node.value>=key)
+        if (node.value<=key)
             node.right=insert(node.right,key);
         else
             node.left=insert(node.left,key);
         return node;
     }
 
-    static private void inOrder(TreeNode node){
+    public void insert(int value){
+        root = insert(root,value);
+    }
+
+     private void inOrder(TreeNode node){
        if (node==null) return;
        inOrder(node.left);
        System.out.print(node.value+" , ");
        inOrder(node.right);
     }
+    public void inOrder(){
+        inOrder(root);
+        System.out.println();
+    }
 
 
-    static private void preOrder(TreeNode node){
+    private int levels(TreeNode node){
+        if (node==null) return 0;
+        else return Math.max(levels(node.left),levels(node.right))+1;
+    }
+
+    public int totalLevel(){
+       return levels(root);
+    }
+
+
+    public void printTree(){
+        int totalLevels = totalLevel();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        while (--totalLevels>=0){
+            int size = queue.size();
+            for (int i=0;i<size;i++) {
+                TreeNode node = queue.poll();
+                if (node.left != null)
+                    queue.add(node.left);
+                if (node.right != null)
+                    queue.add(node.right);
+                System.out.println(node.value + " L -> " + (node.left == null ? null : node.left.value));
+                System.out.println(node.value + " R -> " + ((node.right == null) ? null : node.right.value));
+            }
+        }
+    }
+
+
+
+     private void preOrder(TreeNode node){
        if (node==null) return;
        System.out.print(node.value+" , ");
        preOrder(node.left);
        preOrder(node.right);
     }
 
+    public void preOrder(){
+        preOrder(root);
+        System.out.println();
+    }
 
-    static private void postOrder(TreeNode node){
+
+     private void postOrder(TreeNode node){
        if (node==null) return;
        postOrder(node.left);
        postOrder(node.right);
-       System.out.println(node.value+" , ");
+       System.out.print(node.value+" , ");
     }
 
-    private  static TreeNode construct(int low, int high, int [] inOrder,HashMap<Integer,Integer> postOrder )
+
+    public void postOrder(){
+        postOrder(root);
+        System.out.println();
+    }
+
+    private   static TreeNode construct(int low, int high, int [] inOrder,HashMap<Integer,Integer> postOrder )
     {
+        if (low==high) return new TreeNode(inOrder[low]);
+        else if (low>high) return null;
+
         int max_index=Integer.MIN_VALUE;
         int index=0;
         for (int i = low;i<=high;i++){
@@ -71,8 +123,11 @@ public class Tree {
 
 
 
-    private static TreeNode construct2(int low, int high, int [] inOrder,HashMap<Integer,Integer> preOrder )
+    private  static TreeNode construct2(int low, int high, int [] inOrder,HashMap<Integer,Integer> preOrder )
     {
+        if (low==high) return new TreeNode(inOrder[low]);
+        else if (low>high) return null;
+
         int min_index=Integer.MAX_VALUE;
         int index=0;
         for (int i = low;i<=high;i++){
@@ -93,57 +148,25 @@ public class Tree {
 
 
 
-    private static TreeNode constructTreeFromInAndPreOrder(int [] inorder, int [] preOrder){
+    public static  Tree constructTreeFromInAndPreOrder(int [] inorder, int [] preOrder){
 
         HashMap<Integer,Integer> pre = new HashMap<>();
         for (int i=0;i<preOrder.length;i++)
             pre.put(preOrder[i],i);
 
-       return construct2(0,inorder.length-1,inorder,pre);
+        Tree tree = new Tree();
+        tree.root=construct2(0,inorder.length-1,inorder,pre);
+        return tree;
     }
 
-    private static TreeNode constructTreeFromInAndPostOrder(int [] inorder , int [] postOrder)
+    public   static Tree constructTreeFromInAndPostOrder(int [] inorder , int [] postOrder)
     {
         HashMap<Integer,Integer> post = new HashMap<>();
         for (int i=0;i<postOrder.length;i++)
             post.put(postOrder[i],i);
-        return construct(0,inorder.length-1,inorder,post);
+        Tree tree = new Tree();
+        tree.root=construct(0,inorder.length-1,inorder,post);
+        return tree;
     }
-
-
-
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter number of keys ");
-        int n =  scanner.nextInt();
-        for (int i =0;i<n;i++)
-            root = insert(root,scanner.nextInt());
-        inOrder(root);
-        System.out.println();
-        preOrder(root);
-        System.out.println();
-        postOrder(root);
-        System.out.println();
-
-
-        System.out.println("\nEnter number of elements present in inorder and preorder and postorder");
-        int m = scanner.nextInt();
-        System.out.println("Enter preOrder");
-        int [] preOrder = new int[m];
-        for (int i =0;i<m;i++) preOrder[i] = scanner.nextInt();
-        System.out.println("Enter postOrder");
-        int [] postOrder = new int[m];
-        for (int i =0;i<m;i++) postOrder[i] = scanner.nextInt();
-        System.out.println("Enter Inorder ");
-        int [] inorder = new int[m];
-        for (int i =0;i<m;i++) inorder[i] = scanner.nextInt();
-
-        System.out.println("\nTree Build Using InOrder and PreOrder");
-        TreeNode inorder_preorder = constructTreeFromInAndPreOrder(inorder,preOrder);
-        System.out.println("\nTree Build Using InOrder and PostOrder");
-        TreeNode inorder_postorder = constructTreeFromInAndPostOrder(inorder,postOrder);
-    }
-
 
 }
